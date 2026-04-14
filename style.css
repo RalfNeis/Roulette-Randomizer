@@ -1,0 +1,86 @@
+
+body { font-family: 'Press Start 2P', monospace; }
+.image-rendering-pixelated { image-rendering: pixelated; }
+
+.arcade-filter {
+    filter: sepia(0.6) contrast(1.2) brightness(0.95);
+}
+
+/* Clouds */
+.pixel-cloud {
+    width: 64px; height: 16px; background: white; position: absolute;
+    box-shadow: 16px -16px 0 white, 48px -16px 0 white, 32px 0px 0 white, -16px 0px 0 white;
+}
+
+/* Tree */
+.pixel-tree-large {
+    width: 24px; height: 80px; 
+    background: #8b4513; 
+    position: relative;
+}
+.pixel-tree-large::before {
+    content: ''; position: absolute; top: -60px; left: -40px;
+    width: 104px; height: 64px; 
+    background: #8bda32;
+    
+    box-shadow:
+        16px -16px 0 #8bda32,
+        -16px -16px 0 #8bda32,
+        0px 16px 0 #5ca926,   
+        -16px 16px 0 #5ca926,  
+        16px 16px 0 #5ca926;   
+}
+
+/* Bush */
+.pixel-bush {
+    width: 64px; height: 32px; 
+    background: #8bda32; 
+    position: relative;
+    box-shadow: inset -8px -8px 0 #5ca926; 
+}
+.pixel-bush::before {
+    content: ''; position: absolute; top: -16px; left: 16px;
+    width: 32px; height: 16px; 
+    background: #8bda32;
+}
+
+@keyframes jitter {
+    0% { transform: translate(calc(-50% + 4px), calc(-50% - 4px)); }
+    25% { transform: translate(calc(-50% - 3px), calc(-50% + 4px)); }
+    50% { transform: translate(calc(-50% + 5px), calc(-50% - 3px)); }
+    75% { transform: translate(calc(-50% - 4px), calc(-50% + 5px)); }
+    100% { transform: translate(calc(-50% + 3px), calc(-50% - 4px)); }
+}
+
+.is-scanning {
+    animation: jitter 0.1s infinite;
+    border-color: #fbbf24 !important; 
+}
+.is-scanning div {
+    background-color: #fbbf24 !important;
+}
+
+@keyframes violent-shake {
+    0% { transform: translate(0, 0) rotate(0deg); }
+    10% { transform: translate(-25px, -25px) rotate(-3deg); }
+    20% { transform: translate(25px, 20px) rotate(3deg); }
+    30% { transform: translate(-25px, 25px) rotate(-3deg); }
+    40% { transform: translate(25px, -25px) rotate(3deg); }
+    50% { transform: translate(-15px, -15px) rotate(-2deg); }
+    60% { transform: translate(15px, 15px) rotate(2deg); }
+    70% { transform: translate(-5px, -5px) rotate(0deg); }
+    100% { transform: translate(0, 0) rotate(0deg); }
+}
+
+.shake-active {
+    animation: violent-shake 0.4s cubic-bezier(.36,.07,.19,.97) both;
+}
+
+@keyframes muzzle-flash {
+    0% { opacity: 1; }
+    100% { opacity: 0; }
+}
+
+.flash-active {
+    animation: muzzle-flash 0.15s ease-out forwards;
+}

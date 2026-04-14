@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Duck Hunter Picker</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body class="text-white flex flex-col items-center justify-center min-h-screen overflow-hidden bg-[#64b0ff] relative selection-container">
+    
+    <div id="css-landscape" class="absolute inset-0 z-0 overflow-hidden pointer-events-none">
+        
+        <div class="absolute top-12 left-24 w-16 h-16 bg-[#fde047] shadow-[8px_8px_0_rgba(202,138,4,0.5)]"></div>
+
+        <div class="pixel-cloud top-16 left-[20%]"></div>
+        <div class="pixel-cloud top-24 right-[25%] scale-150 opacity-90"></div>
+        <div class="pixel-cloud top-12 right-[10%] scale-75 opacity-80"></div>
+
+        <div class="absolute bottom-[20%] left-[10%] md:left-[15%] transform scale-[2] md:scale-[2.5] origin-bottom">
+            <div class="pixel-tree-large"></div>
+        </div>
+
+        <div class="absolute bottom-[20%] right-[15%] md:right-[20%] transform scale-[1.5] md:scale-[2] origin-bottom">
+            <div class="pixel-bush"></div>
+        </div>
+
+        <div class="absolute bottom-0 w-full h-[20%] bg-[#8bda32] border-t-[12px] border-dashed border-[#5ca926]">
+            <div class="absolute bottom-0 w-full h-[30%] bg-[#8b4513]"></div>
+        </div>
+    </div>
+
+    <div class="absolute top-8 text-center z-10 w-full drop-shadow-[0_4px_0_rgba(0,0,0,0.8)]">
+        <h1 class="text-3xl md:text-5xl text-orange-400 mb-4 tracking-widest">DUCK HUNTER</h1>
+        <p class="text-sm md:text-base text-white animate-pulse">AWAITING ZAPPER INPUT...</p>
+    </div>
+
+    <div class="relative w-full h-64 md:h-80 flex items-center overflow-hidden border-y-[12px] border-orange-900 bg-[#3b82f6] shadow-[inset_0_0_30px_rgba(0,0,0,0.6)] z-10 mt-12">
+        <div id="reticle" class="absolute left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2 w-56 h-56 md:w-72 md:h-72 border-8 border-red-500 z-20 pointer-events-none flex items-center justify-center transition-all duration-200 shadow-[0_0_15px_#ef4444]">
+            <div class="w-4 h-4 bg-red-500 rounded-full animate-ping"></div>
+        </div>
+
+        <div id="track" class="flex gap-8 absolute left-0 h-full items-center pl-[50vw]">
+            </div>
+    </div>
+
+    <div class="absolute bottom-10 z-10">
+        <button id="scan-btn" class="bg-orange-500 hover:bg-orange-400 text-white px-10 py-5 text-2xl border-b-8 border-orange-800 active:border-b-0 active:translate-y-2 transition-all shadow-[0_10px_0_rgba(0,0,0,0.5)]">
+            FIRE ZAPPER!
+        </button>
+    </div>
+
+    <div id="flash" class="fixed inset-0 bg-white z-40 opacity-0 pointer-events-none"></div>
+
+    <div id="winner-modal" class="fixed inset-0 bg-black/80 flex items-center justify-center hidden z-50 transition-opacity duration-500 opacity-0">
+        <div id="winner-card" class="bg-[#fef08a] border-[12px] md:border-x-[16px] md:border-y-[20px] border-[#ca8a04] p-4 md:p-8 text-center flex flex-col items-center transform scale-500 transition-transform duration-700 ease-out shadow-[15px_15px_0_rgba(0,0,0,0.6)] relative max-w-5xl w-[95%] md:w-auto">
+            <h2 class="text-[#713f12] text-3xl md:text-5xl mb-1 tracking-tighter">WANTED</h2>
+            <h3 class="text-[#a16207] text-xs md:text-sm mb-4 md:mb-6 tracking-[0.2em]">SEASONED TARGET</h3>
+            
+            <div class="relative w-full h-64 sm:h-80 md:w-[40rem] md:h-[28rem] border-[8px] md:border-[12px] border-[#713f12] bg-[#fcd34d] mb-4 md:mb-6 shadow-inner">
+                <img id="winner-img" src="" alt="Winner" class="w-full h-full object-cover image-rendering-pixelated arcade-filter">
+            </div>
+            
+            <h3 id="winner-name" class="text-[#713f12] text-2xl md:text-4xl mb-2 mt-2 tracking-wider">NAME</h3>
+            <p class="text-orange-600 text-xl md:text-3xl tracking-widest drop-shadow-sm mb-1">50,000 PTS</p>
+            <p class="text-[#854d0e] text-[10px] md:text-xs mt-3 md:mt-4 tracking-widest">HUNTER'S ASSOCIATION</p>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
