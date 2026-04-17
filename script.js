@@ -1,4 +1,4 @@
-
+// Full list of 38 participants
 const participants = [
     { name: "SURIAGA", image: "./images/SURIAGA.jpg" },
     { name: "ENDAYA", image: "./images/ENDAYA.png" },
@@ -40,8 +40,12 @@ const participants = [
     { name: "DIMAILIG", image: "./images/DIMAILIG.jpg" }
 ];
 
+// The active pool of targets who haven't been picked yet
+let activeParticipants = [...participants];
+
 const track = document.getElementById('track');
 const scanBtn = document.getElementById('scan-btn');
+const resetBtn = document.getElementById('reset-btn'); // Grab the new button
 const reticle = document.getElementById('reticle');
 const flash = document.getElementById('flash');
 const modal = document.getElementById('winner-modal');
@@ -50,13 +54,11 @@ const winnerImg = document.getElementById('winner-img');
 const winnerName = document.getElementById('winner-name');
 
 let position = 0;
-let velocity = 0;
 let isSpinning = false;
 let animationFrameId;
-let targetLocked = false;
 let DOMItems = [];
 
-// Shuffle Array 
+// Shuffle Array purely for visually scrambling the reel
 function shuffle(array) {
     let currentIndex = array.length, randomIndex;
     while (currentIndex !== 0) {
@@ -67,12 +69,19 @@ function shuffle(array) {
     return array;
 }
 
+// Build the Reel
 function buildTrack() {
     track.innerHTML = '';
     DOMItems = [];
+    position = 0;
+    track.style.transform = `translateX(0px)`;
     
-    const shuffled = shuffle([...participants]);
-    const trackData = [...shuffled, ...shuffled, ...shuffled, ...shuffled]; 
+    const shuffled1 = shuffle([...participants]);
+    const shuffled2 = shuffle([...participants]);
+    const shuffled3 = shuffle([...participants]);
+    const shuffled4 = shuffle([...participants]);
+    
+    const trackData = [...shuffled1, ...shuffled2, ...shuffled3, ...shuffled4]; 
 
     trackData.forEach((participant, index) => {
         const item = document.createElement('div');
@@ -91,86 +100,84 @@ function buildTrack() {
             index: index
         });
     });
-
-    position = 0;
-    track.style.transform = `translateX(0px)`;
-}
-
-function updatePhysics() {
-    if (!isSpinning) return;
-
-    position -= velocity; 
-    
-    if (targetLocked) {
-        velocity *= 0.975; 
-    }
-
-    if (targetLocked && velocity < 1.5) {
-        velocity = 0;
-        isSpinning = false;
-        
-        const screenCenter = window.innerWidth / 2;
-        let closestItem = null;
-        let minDistance = Infinity;
-
-        DOMItems.forEach(itemObj => {
-            const rect = itemObj.element.getBoundingClientRect();
-            const itemCenter = rect.left + rect.width / 2;
-            const distance = Math.abs(screenCenter - itemCenter);
-
-            if (distance < minDistance) {
-                minDistance = distance;
-                closestItem = itemObj;
-            }
-        });
-
-        //snap the closest image perfectly to the center
-        const winnerRect = closestItem.element.getBoundingClientRect();
-        const winnerCenter = winnerRect.left + winnerRect.width / 2;
-        const snapOffset = screenCenter - winnerCenter;
-
-        position += snapOffset;
-        track.style.transform = `translateX(${position}px)`;
-        
-        // Highlight 
-        const winner = closestItem.data;
-        closestItem.element.classList.remove('opacity-40');
-        closestItem.element.classList.add('border-red-500', 'opacity-100');
-        closestItem.element.querySelector('img').classList.remove('mix-blend-luminosity', 'brightness-75');
-        
-        triggerShotSequence(winner);
-        return; 
-    }
-
-    track.style.transform = `translateX(${position}px)`;
-    animationFrameId = requestAnimationFrame(updatePhysics);
 }
 
 // Start the Roll
 function startScan() {
     if (isSpinning) return;
     
-    buildTrack(); 
-    isSpinning = true;
-    targetLocked = false;
-    velocity = 60 + Math.random() * 20; // Very fast initial speed
+    // Check if everyone has been picked
+    if (activeParticipants.length === 0) {
+        alert("ALL TARGETS ELIMINATED! Please press RESET to restock the deck.");
+        return; // Stop function so they have to manually reset
+    }
     
+    isSpinning = true;
+
+    // 1. Pick a truly random winner from the remaining ACTIVE pool
+    const randomIndex = Math.floor(Math.random() * activeParticipants.length);
+    const chosenWinner = activeParticipants[randomIndex];
+    
+    // 2. DELETE them from the active pool so they cannot be picked again
+    activeParticipants.splice(randomIndex, 1);
+
+    // 3. Build the visual track 
+    buildTrack(); 
+    
+    // UI Updates
     scanBtn.disabled = true;
-    scanBtn.innerText = "HUNTING...";
+    scanBtn.innerText = `HUNTING... (${activeParticipants.length} LEFT)`;
     reticle.classList.add('is-scanning');
     
-    updatePhysics();
+    // 4. Locate the chosen winner in the 3rd duplicated chunk of the track 
+    let targetDOMItem = DOMItems.find((item, index) => 
+        item.data.name === chosenWinner.name && 
+        index >= participants.length * 2 && 
+        index < participants.length * 3
+    );
 
-    // Lock onto target 
-    setTimeout(() => {
-        targetLocked = true;
-    }, 1500 + Math.random() * 1500);
+    // 5. Calculate the exact math required to land that specific image in the center
+    const screenCenter = window.innerWidth / 2;
+    const targetRect = targetDOMItem.element.getBoundingClientRect();
+    const targetOffset = (screenCenter - (targetRect.left + targetRect.width / 2));
+    
+    // 6. Smooth Deceleration Physics
+    let startTime = null;
+    let startPos = 0;
+    let duration = 3500 + Math.random() * 1500; // Spins for 3.5 to 5 seconds
+
+    function animateSpin(timestamp) {
+        if (!startTime) startTime = timestamp;
+        let progress = (timestamp - startTime) / duration;
+
+        if (progress > 1) progress = 1;
+
+        let ease = 1 - Math.pow(1 - progress, 3);
+
+        position = startPos + (targetOffset - startPos) * ease;
+        track.style.transform = `translateX(${position}px)`;
+
+        if (progress < 1) {
+            animationFrameId = requestAnimationFrame(animateSpin);
+        } else {
+            // Animation finished! Lock target.
+            isSpinning = false;
+            targetDOMItem.element.classList.remove('opacity-40');
+            targetDOMItem.element.classList.add('border-red-500', 'opacity-100');
+            targetDOMItem.element.querySelector('img').classList.remove('mix-blend-luminosity', 'brightness-75');
+            
+            triggerShotSequence(chosenWinner);
+        }
+    }
+
+    // Start the animation loop
+    animationFrameId = requestAnimationFrame(animateSpin);
 }
 
+// The Zapper Shot and Cinematic Reveal
 function triggerShotSequence(winner) {
     reticle.classList.remove('is-scanning');
     
-    //Flash and Shake
     flash.classList.add('flash-active');
     document.body.classList.add('shake-active');
     
@@ -179,28 +186,32 @@ function triggerShotSequence(winner) {
         document.body.classList.remove('shake-active');
     }, 400);
 
-    // Pop up
     setTimeout(() => {
-        // Insert data
         winnerImg.src = winner.image;
         winnerName.innerText = winner.name;
         
         modal.classList.remove('hidden');
         
-        // Animate pop-in
         setTimeout(() => {
             modal.classList.remove('opacity-0');
             winnerCard.classList.remove('scale-500');
             winnerCard.classList.add('scale-100');
         }, 50);
         
-        // Reset Button
         scanBtn.disabled = false;
-        scanBtn.innerText = "FIRE ZAPPER!";
+        scanBtn.innerText = `FIRE ZAPPER! (${activeParticipants.length} LEFT)`;
     }, 800);
 }
 
-// Close the modal by clicking anywhere on it
+// Logic for the new Reset Button
+function resetGame() {
+    if (isSpinning) return; // Prevent resetting while the reel is actively spinning
+    
+    activeParticipants = [...participants]; // Refill the array
+    scanBtn.innerText = `FIRE ZAPPER! (${activeParticipants.length} LEFT)`; // Update the UI
+    buildTrack(); // Re-shuffle the reel visually
+}
+
 modal.addEventListener('click', (e) => {
     if(e.target === modal) {
         modal.classList.add('opacity-0');
@@ -213,6 +224,8 @@ modal.addEventListener('click', (e) => {
 });
 
 scanBtn.addEventListener('click', startScan);
+resetBtn.addEventListener('click', resetGame); // Bind the event listener to the reset button
 
-// Build the track when the page loads
+// Build an initial track on page load so it's not empty
 buildTrack();
+scanBtn.innerText = `FIRE ZAPPER! (${activeParticipants.length} LEFT)`;
